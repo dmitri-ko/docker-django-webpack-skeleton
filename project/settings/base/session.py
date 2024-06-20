@@ -1,5 +1,5 @@
 # to allow api client save environment state to database.
-SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 
 # we use cached_db backend for longlive and fast sessions.
 SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'

@@ -9,23 +9,26 @@ RUN bash -c 'if [ -n "$APTPROXY" ]; then echo "Acquire::HTTP::Proxy \"http://$AP
 ## Install dependencies
 RUN apt-get update \
     && apt-get --no-install-recommends install -y vim-tiny \
-
     # Install latest NodeJS + NPM
-    && apt-get --no-install-recommends install -y curl ca-certificates apt-transport-https lsb-release \
-    && curl -sSL https://deb.nodesource.com/setup_7.x | bash - \
-    && apt-get --no-install-recommends install -y nodejs \
-
+    && apt-get --no-install-recommends install -y curl ca-certificates apt-transport-https lsb-release gnupg \
+    && mkdir -p /etc/apt/keyrings \
+    && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key \
+     | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
+    && NODE_MAJOR=20 \
+    && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" \
+     | tee /etc/apt/sources.list.d/nodesource.list \
+    && apt-get update \
+    && apt-get install nodejs -y \
+    &&  npm install -g npm@10.8.1  \
     # Install global NPM packages
     && npm install -g webpack \
-
     # Cleanup after installation
-    && npm cache clear \
+    && npm cache verify \
     && rm -rf /tmp/npm-* \
     && apt-get clean -y \
     && apt-get autoclean -y \
     && apt-get autoremove -y \
     && rm -fr /var/lib/apt/lists/* \
-
     # Create basic project structure
     && mkdir -p /app/project/assets/
 
@@ -33,7 +36,7 @@ ADD project/assets/package.json /app/package.json
 
 RUN cd /app \
     && npm install \
-    && npm cache clear
+    && npm cache verify
 
 WORKDIR /app/project/assets/
 
